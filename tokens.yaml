@@ -1,0 +1,11 @@
+hf_token: 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
+serpapi_api_key: d27d89fb7a526562d2d1b067b997ad39ecd262e9f87fad8a545981c9db953e63
+embedding_model: AI-Growth-Lab/PatentSBERTa
+BART_model: facebook/bart-large-cnn
+dataset_chroma_db: ./dschroma_db
+dataset_chroma_db_collection_name: PatentQA
+chatPDF_chroma_db: ./pdfpatentchroma_db
+llm_repoid: HuggingFaceH4/zephyr-7b-beta
+reactstyle_prompt: hwchase17/react-json
+groq_api: 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
+pdf_chat_model: facebook/bart-large-cnn

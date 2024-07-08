@@ -1,12 +1,12 @@
 install:
 		pip install --upgrade pip &&\
-			pip install -r llm_app/requirements.txt
+			pip install -r requirements.txt
 
 format:
-		black llm_app/*.py
+		black pages/*.py
 
 lint:
-		pylint --disable=R,C llm_app/*.py  || true
+		pylint --disable=R,C pages/*.py  || true
 
 
 

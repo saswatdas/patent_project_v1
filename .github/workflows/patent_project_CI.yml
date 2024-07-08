@@ -25,7 +25,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies build, format, lint
       run: |
-        make all
+        make install
     - name: Build the Docker image
       run: docker build . -t new_patent_app
     - name: Login to Docker Hub

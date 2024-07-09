@@ -37,9 +37,12 @@ jobs:
       with:
           username: saswatdas123
           password: ${{secrets.DOCKERHUBSECRET}}
-    - name: Deploy Docker images to Docker Hub
+    - name: Create a tag for the  Docker image
       run:
           docker tag new_patent_app:1.1 new_patent_app
+          
+    - name: Deploy Docker images to Docker Hub
+      run:
           docker push new_patent_app
   
    

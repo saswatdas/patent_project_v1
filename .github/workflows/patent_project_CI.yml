@@ -31,18 +31,15 @@ jobs:
       run: |
         make install
     - name: Build the Docker image
-      run: docker build . -t new_patent_app
+      run: docker build . -t saswatdas123/new_patent_app
     - name: Login to Docker Hub
       uses: docker/login-action@v3
       with:
           username: saswatdas123
           password: ${{secrets.DOCKERHUBSECRET}}
-    - name: Create a tag for the  Docker image
-      run:
-          docker tag new_patent_app new_patent_app:latest
           
     - name: Deploy Docker images to Docker Hub
       run:
-          docker push new_patent_app
+          docker push saswatdas123/new_patent_app
   
    

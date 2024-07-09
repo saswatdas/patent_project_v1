@@ -2,13 +2,13 @@ import streamlit as st
 import os
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.document_loaders import UnstructuredFileLoader, DirectoryLoader
-from langchain_community.text_splitter import CharacterTextSplitter
+from langchain.text_splitter import CharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 #from langchain.llms import HuggingFaceHub
 #from langchain_community.vectorstores  import Chroma
 from langchain_community.vectorstores import Chroma
 #from langchain.chains import ConversationalRetrievalChain
-from langchain_community.text_splitter import RecursiveCharacterTextSplitter
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 import sys,yaml,Utilities as ut
 
 from streamlit import session_state as ss

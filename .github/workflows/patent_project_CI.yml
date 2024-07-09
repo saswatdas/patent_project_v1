@@ -39,7 +39,7 @@ jobs:
           password: ${{secrets.DOCKERHUBSECRET}}
     - name: Create a tag for the  Docker image
       run:
-          docker tag new_patent_app:1.1 new_patent_app
+          docker tag new_patent_app new_patent_app:latest
           
     - name: Deploy Docker images to Docker Hub
       run:

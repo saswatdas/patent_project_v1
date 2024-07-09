@@ -8,4 +8,5 @@ chatPDF_chroma_db: ./pdfpatentchroma_db
 llm_repoid: HuggingFaceH4/zephyr-7b-beta
 reactstyle_prompt: hwchase17/react-json
 groq_api: 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
-pdf_chat_model: facebook/bart-large-cnn
+pdf_chat_model: llama3-70b-8192
+chat_model:  llama3-8b-8192

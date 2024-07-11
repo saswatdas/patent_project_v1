@@ -10,6 +10,10 @@ jobs:
   deploy:
     runs-on: self-hosted
     steps:
+      - name: Remove unnecessary files
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
       - name: Pull Docker Image from Docker Hub
         run: sudo docker pull saswatdas123/new_patent_app
       - name: Delete Old Docker Container

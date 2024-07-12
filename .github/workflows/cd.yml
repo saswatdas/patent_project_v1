@@ -15,8 +15,8 @@ jobs:
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf "$AGENT_TOOLSDIRECTORY"
       - name: Pull Docker Image from Docker Hub
-        run: sudo docker pull saswatdas123/new_patent_app2
+        run: sudo docker pull saswatdas123/patent_app_1
       - name: Delete Old Docker Container
         run: sudo docker rm -f patent_app || true
       - name: Run Docker Container 
-        run: sudo docker run -it -d -p 8501:8501 --name patent_app saswatdas123/new_patent_app2
+        run: sudo docker run -it -d -p 8501:8501 --name patent_app saswatdas123/patent_app_1

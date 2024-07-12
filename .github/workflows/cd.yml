@@ -12,7 +12,7 @@ jobs:
   deploy:
     runs-on: self-hosted
     steps:
-      - name: Remove unnecessary files from the workspace.
+      - name: Remove unnecessary files from the workspace...
         run: |
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf "$AGENT_TOOLSDIRECTORY"

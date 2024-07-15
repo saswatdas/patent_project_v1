@@ -1,10 +1,11 @@
 # import required libraries
 #from langchain.document_loaders import PyPDFLoader
 #from langchain.text_splitter import CharacterTextSplitter
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain.embeddings import HuggingFaceEmbeddings
 #from langchain.llms import HuggingFaceHub
+from langchain.vectorstores import Chroma
 from langchain_community.vectorstores import Chroma
-from langchain_community.vectorstores import Chroma
+from sentence_transformers import SentenceTransformer
 from langchain.chains import ConversationalRetrievalChain
 #from langchain.text_splitter import NLTKTextSplitter
 #from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -22,35 +23,31 @@ import Utilities as ut
 from groq import Groq
 
 import streamlit as st
-import sys,yaml
+import sys,yaml,json
+import chromadb
 
-custom_prompt_template = """Use the following pieces of information to answer the user's question.
-If you don't know the answer, just say that you don't know, don't try to make up an answer.
+initdict={}
+initdict = ut.get_tokens()
 
-Context: {context}
-Question: {question}
+groq_api_key = initdict["groq_api"]
+chatmodel = initdict["chat_model"]
 
-Only return the helpful answer below and nothing else.
-Helpful answer:
-"""
-def set_custom_prompt():
-    """
-    Prompt template for QA retrieval for each vectorstore
-    """
-    prompt = PromptTemplate(template=custom_prompt_template,
-                            input_variables=['context', 'question'])
-    return prompt
+messages = [
+    {"role": "system", "content": "You are an assistant designed to provide answers from the provided context. If the answer is not available in the context, do not make up an answer"}
+]
+client = Groq(
+    api_key=groq_api_key,
+)
 
-class StreamHandler(BaseCallbackHandler):
-    def __init__(self, container, initial_text=""):
-        self.container = container
-        self.text=initial_text
-    def on_llm_new_token(self, token: str, **kwargs) -> None:
-        # "/" is a marker to show difference 
-        # you don't need it 
-        #self.text+=token+"/" 
-        self.text+=token
-        self.container.markdown(self.text) 
+
+def filterdistance(distcoll):
+    myemptydict={}
+    if len(distcoll) < 0:myemptydict
+    for distances in distcoll['distances']:
+        for distance in distances:
+            if distance<50: return distcoll
+            else: return myemptydict
+           
 
 def get_data(query):
     chat_history = []
@@ -61,60 +58,66 @@ def get_data(query):
     chromadbpath = initdict["chatPDF_chroma_db"]
     llm_repo_id = initdict["pdf_chat_model"]
     groq_api_key = initdict["groq_api"]
-    
+    embedding_model_id = initdict["embedding_model"]
     # We will use HuggingFace embeddings 
     embeddings = HuggingFaceEmbeddings(model_name=embedding_model_id)
 
-    #retriever = db.as_retriever(search_type="mmr", search_kwargs={'k': 1})
-    # load from disk
-    print(chromadbpath)
-    db = Chroma(persist_directory=chromadbpath, embedding_function=embeddings)
-    retriever = db.as_retriever(search_type="mmr", search_kwargs={'k': 2})
-    # Callbacks support token-wise streaming
-    callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
+    embedding_model = SentenceTransformer(embedding_model_id)
+    chroma_client = chromadb.PersistentClient(path = chromadbpath)
+    collection = chroma_client.get_collection(name = "pdfstore")
+ 
+    #collection = chroma_client.get_or_create_collection(name=chromadbcollname)
+    query_vector = embedding_model.encode(query).tolist()
+    output = collection.query(
+        query_embeddings=[query_vector],
+        n_results=1,
+        #where={"distances": "is_less_than_1"},
+        include=['documents','distances'],
+        
+        )
+    print (output)
+    #Filter for distances
+    #output = filterdistance(output)
+    return json.dumps(output)
     
-    chat_box=st.empty() 
-    stream_handler = StreamHandler(chat_box)
-    
-    #llm = HuggingFaceHub(huggingfacehub_api_token=hf_token, 
-    #                    repo_id=llm_repo_id,  callback_manager = [stream_handler], verbose=True, model_kwargs={"temperature":0.2, "max_new_tokens":256})
-
-    
-    #llm = Groq(api_key=groq_api_key, model="llama3-70b-8192")
-    # Initialize a ChatGroq object with a temperature of 0 and the "mixtral-8x7b-32768" model.
-    prompt = set_custom_prompt()
-
-    chat_model = ChatGroq(temperature=0, model_name=llm_repo_id,api_key=groq_api_key)
-
-
-    qa = RetrievalQA.from_chain_type(llm=chat_model,
-                                chain_type="stuff",
-                                retriever=retriever,
-                                return_source_documents=True,
-                                chain_type_kwargs={"prompt": prompt})
-
-    response = qa.invoke({"query": query})
-    return response
-    
+        
 st.title("PatentGuru PDF Reader")
 
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+# Display chat messages from history on app rerun   
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        #print("history Messages:::",message["content"])
+        st.markdown(message["content"])
 # Main chat form
-with st.form("chat_form"):
-    query = st.text_input("Chat with PDF: ")
-    clear_history = st.checkbox('Clear previous chat history') 
-    submit_button = st.form_submit_button("Send")    
 
-if submit_button:
-    if clear_history:
+#query = st.chat_input()
+clear_history = st.checkbox('Clear previous chat history') 
+if clear_history:
+        st.session_state.messages = []
         st.write("Cleared previous chat history")
+if query := st.chat_input():
+   
     
+    st.chat_message("user").write(query)
     response = get_data(query)
     print(response)
     
     if len(response)>0:
-        st.write(response['result'])
-        if response['result'].upper()=="I DON'T KNOW.":
-            st.write("The requested information is not available in my PDF source document repository")           
+        prompt= 'Answer the question'+ query + 'only if its available in the provided context. Do not provide answer if it is not available in the provided context. The provided context is:' + response
+        messages.append({"role": "user", "content": prompt})
+        st.session_state.messages.append({"role": "user", "content": query})
+        chat_completion = client.chat.completions.create(
+        messages=messages,
+        model=chatmodel,
+        )
+        response = chat_completion.choices[0].message.content
+        st.write(response)
+        # Add the response to the messages as an Assistant Role
+        messages.append({"role": "assistant", "content": response})
+        st.session_state.messages.append({"role": "assistant", "content": response})
+    
     else: 
         # write results
         st.write ("No results")

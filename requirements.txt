@@ -179,3 +179,5 @@ llama-index-llms-groq
 streamlit_pdf_viewer
 langchain_groq
 psutil
+langchain_groq
+PyPDF2

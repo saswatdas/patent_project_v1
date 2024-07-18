@@ -11,10 +11,10 @@ WORKDIR /patent_project
 ADD /*.py .
 ADD /*.txt .
 ADD /*.yaml .
-ADD /pages/*.* ./pages/
+#ADD /pages/*.* ./pages/
 #ADD /model/* ./model/
 ADD /tempDir/*.* ./tempDir/
-ADD /pdfpatentchroma_db ./pdfpatentchroma_db
+#ADD /pdfpatentchroma_db ./pdfpatentchroma_db
 ADD /data/*.* ./data/
 
 # update pip

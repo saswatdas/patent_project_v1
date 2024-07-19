@@ -45,7 +45,7 @@ def filterdistance(distcoll):
     if len(distcoll) < 0:myemptydict
     for distances in distcoll['distances']:
         for distance in distances:
-            if distance<50: return distcoll
+            if distance<100: return distcoll
             else: return myemptydict
            
 
@@ -79,30 +79,43 @@ def get_data(query):
     #Filter for distances
     #output = filterdistance(output)
     return json.dumps(output)
-    
-        
+     
 st.title("PatentGuru PDF Reader")
+print("Before Checking messages list!.....") 
 
+col1, col2, col3, col4= st.columns(4)
+
+#def showHistory():
 if "messages" not in st.session_state:
     st.session_state.messages = []
-# Display chat messages from history on app rerun   
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        #print("history Messages:::",message["content"])
-        st.markdown(message["content"])
+    print("After Checking messages!.....",len(st.session_state.messages)) 
+    #showHistory()
+# Display chat messages from history on app rerun  
+
+
 # Main chat form
 
 #query = st.chat_input()
-clear_history = st.checkbox('Clear previous chat history') 
-if clear_history:
-        st.session_state.messages = []
-        st.write("Cleared previous chat history")
+with col4:
+    clear_history = st.checkbox('Clear chat history', key="streamlit_checkbox") 
+    print('  clear_history  ',clear_history)
+    if clear_history:
+            
+            print("Inside Clear history....>", len(st.session_state.messages))
+            st.session_state.messages = []
+            #showHistory()
+            #st.write("Cleared chat history")
+for message in st.session_state.messages:
+        
+    with st.chat_message(message["role"]):
+            #print("history Messages:::",message["content"])
+            st.markdown(message["content"])
 if query := st.chat_input():
    
     
     st.chat_message("user").write(query)
     response = get_data(query)
-    print(response)
+    print('response>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n'+response)
     
     if len(response)>0:
         prompt= 'Answer the question'+ query + 'only if its available in the provided context. Do not provide answer if it is not available in the provided context. The provided context is:' + response
